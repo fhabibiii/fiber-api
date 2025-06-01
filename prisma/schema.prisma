@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  AFFILIATOR
+}
+
+model User {
+  uuid        String     @id @default(uuid())
+  fullName    String
+  username    String     @unique
+  password    String
+  phoneNumber String
+  role        Role       @default(AFFILIATOR)
+  createdAt   DateTime   @default(now())
+
+  customers   Customer[] @relation("AffCust")
+  payments    Payment[]  @relation("AffPay")
+}
+
+model Customer {
+  uuid            String   @id @default(uuid())
+  fullName        String
+  phoneNumber     String
+  fullAddress     String   @db.Text
+  affiliator      User     @relation("AffCust", fields: [affiliatorUuid], references: [uuid])
+  affiliatorUuid  String
+  createdAt       DateTime @default(now())
+}
+
+model Payment {
+  uuid            String   @id @default(uuid())
+  affiliator      User     @relation("AffPay", fields: [affiliatorUuid], references: [uuid])
+  affiliatorUuid  String
+  month           String
+  year            Int
+  amount          Float
+  paymentDate     DateTime
+  proofImage      String
+  createdAt       DateTime @default(now())
+}
+
+model StatisticLog {
+  id        Int      @id @default(autoincrement())
+  type      String   // CUSTOMER, PAYMENT, etc.
+  year      Int
+  data      String   @db.Text // JSON string
+  createdAt DateTime @default(now())
+}
