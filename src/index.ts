@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
-import fs from 'fs';
+import http from 'http';
+
 import logger from './utils/logger';
 import authRoutes from './routes/auth.routes';
 import affiliatorRoutes from './routes/affiliator.routes';
@@ -16,25 +17,27 @@ import fileRoutes from './routes/file.routes';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Ensure uploads directory exists
+// Port
+const PORT = Number(process.env.PORT) || 3001;
+
+// Pastikan folder uploads ada
 const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+if (!require('fs').existsSync(uploadDir)) {
+  require('fs').mkdirSync(uploadDir, { recursive: true });
 }
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Request logger middleware
+// Logger middleware
 app.use((req, res, next) => {
   logger.logRequest(req.method, req.path, req.ip || 'unknown');
   next();
 });
 
-// Serve static files from the uploads directory
+// Static files
 app.use('/api/v1/files', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
@@ -42,7 +45,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/affiliators', affiliatorRoutes);
 app.use('/api/v1/customers', customerRoutes);
 app.use('/api/v1/payments', paymentRoutes);
-app.use('/api/v1/payment', paymentRoutes); // Add singular version for compatibility
+app.use('/api/v1/payment', paymentRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/affiliator', affiliatorUserRoutes);
 app.use('/api/v1/upload', uploadRoutes);
@@ -56,7 +59,7 @@ app.get('/api/v1', (req, res) => {
   });
 });
 
-// Error handling middleware
+// Error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error('Server error', err.stack);
   res.status(err.statusCode || 500).json({
@@ -65,6 +68,8 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
+// Jalankan HTTP server
+const server = http.createServer(app);
+server.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT} (HTTP only)`);
 });

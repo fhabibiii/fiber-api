@@ -1,134 +1,183 @@
-# FiberNode Affiliate API
+# Fiber API
 
-Backend API untuk sistem afiliasi FiberNode dibangun dengan Node.js, Express, dan Prisma.
+API untuk sistem Fibernode Affiliate yang dibangun dengan Node.js, Express, dan TypeScript.
 
 ## Prasyarat
 
-- Node.js (v16 atau lebih baru)
-- npm (v8 atau lebih baru)
-- PM2 (untuk production)
+- Node.js (versi 18 atau lebih baru)
+- npm (biasanya sudah termasuk dengan Node.js)
 - Git
-- Database (sesuai konfigurasi Prisma)
+- PM2 (akan diinstal nanti)
 
 ## Instalasi
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/fhabibiii/fiber-api.git
-   cd fiber-api
-   ```
+### 1. Clone Repository
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+Buka Command Prompt atau PowerShell, lalu jalankan perintah berikut:
 
-3. Buat file `.env` di root direktori dan isi dengan konfigurasi yang diperlukan:
-   ```env
-   # Port aplikasi
-   PORT=3001
-   
-   # Database (sesuaikan dengan konfigurasi Anda)
-   DATABASE_URL="postgresql://user:password@localhost:5432/fibernode_db?schema=public"
-   
-   # JWT Secret
-   JWT_SECRET=your_jwt_secret_key
-   
-   # Konfigurasi lainnya sesuai kebutuhan
-   ```
-
-4. Generate Prisma client:
-   ```bash
-   npx prisma generate
-   ```
-
-5. Jalankan migrasi database:
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-## Pengembangan
-
-Jalankan server pengembangan:
 ```bash
+git clone https://github.com/fhabibiii/fiber-api.git
+cd fiber-api
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Konfigurasi Environment
+
+1. Buat file baru bernama `.env` di direktori root proyek
+2. Salin isi dari file `.env.example` (jika ada) ke dalam file `.env`
+3. Sesuaikan konfigurasi sesuai kebutuhan, contoh:
+
+```env
+# Port yang akan digunakan (default: 3001)
+PORT=3001
+
+# Konfigurasi Database
+DATABASE_URL="mysql://user:password@localhost:3306/db_name"
+
+# JWT Secret Key
+JWT_SECRET=your_jwt_secret_key_here
+
+# Konfigurasi lainnya (sesuaikan dengan kebutuhan)
+```
+
+### 4. Build Project
+
+```bash
+# Build project TypeScript ke JavaScript
+npm run build
+```
+
+## Menjalankan Aplikasi
+
+### Mode Development
+
+```bash
+# Jalankan dalam mode development dengan hot-reload
 npm run dev
 ```
 
-Server akan berjalan di `http://localhost:3001` (atau port yang dikonfigurasi di `.env`).
+### Mode Produksi
 
-## Produksi dengan PM2
+1. Pastikan sudah melakukan build terlebih dahulu
+2. Jalankan aplikasi:
 
-1. Install PM2 secara global (jika belum terinstall):
-   ```bash
-   npm install -g pm2
-   ```
-
-2. Build aplikasi:
-   ```bash
-   npm run build
-   ```
-
-3. Buat file konfigurasi PM2 (`ecosystem.config.js`):
-   ```javascript
-   module.exports = {
-     apps: [{
-       name: 'fibernode-api',
-       script: './dist/index.js',
-       instances: 'max',
-       exec_mode: 'cluster',
-       autorestart: true,
-       watch: false,
-       max_memory_restart: '1G',
-       env: {
-         NODE_ENV: 'production',
-         PORT: 3001
-       }
-     }]
-   };
-   ```
-
-4. Mulai aplikasi dengan PM2:
-   ```bash
-   pm2 start ecosystem.config.js
-   ```
-
-5. Simpan konfigurasi PM2 agar bisa dijalankan ulang saat restart:
-   ```bash
-   pm2 save
-   pm2 startup
-   ```
-
-6. Aktifkan PM2 untuk berjalan saat startup:
-   ```bash
-   pm2 startup
-   ```
-   Ikuti perintah yang muncul untuk mengaktifkan startup script.
-
-## Perintah PM2 yang Berguna
-
-- Melihat daftar aplikasi: `pm2 list`
-- Melihat log: `pm2 logs fibernode-api`
-- Memantau resource: `pm2 monit`
-- Restart aplikasi: `pm2 restart fibernode-api`
-- Stop aplikasi: `pm2 stop fibernode-api`
-- Hapus dari daftar PM2: `pm2 delete fibernode-api`
-
-## Migrasi Database
-
-Untuk menjalankan migrasi terbaru:
 ```bash
-npx prisma migrate deploy
+# Jalankan aplikasi yang sudah di-build
+npm start
 ```
 
-## Environment Variables
+## Menggunakan PM2
 
-Pastikan untuk mengatur variabel lingkungan yang diperlukan di file `.env`:
+### 1. Install PM2 Secara Global
 
-- `PORT`: Port yang digunakan oleh aplikasi (default: 3001)
-- `DATABASE_URL`: URL koneksi database
-- `JWT_SECRET`: Secret key untuk JWT
-- Variabel lain yang diperlukan oleh aplikasi
+```bash
+npm install -g pm2
+```
+
+### 2. Menjalankan Aplikasi dengan PM2
+
+```bash
+# Jalankan aplikasi
+pm2 start dist/index.js --name "fiber-api"
+
+# Atau gunakan konfigurasi dari ecosystem.config.js
+pm2 start ecosystem.config.js
+```
+
+### 3. Perintah Dasar PM2
+
+```bash
+# Melihat daftar aplikasi yang berjalan
+pm2 list
+
+# Menghentikan aplikasi
+pm2 stop fiber-api
+
+# Me-restart aplikasi
+pm2 restart fiber-api
+
+# Menghapus aplikasi dari daftar PM2
+pm2 delete fiber-api
+
+# Melihat log aplikasi
+pm2 logs fiber-api
+
+# Memantau resource yang digunakan
+pm2 monit
+```
+
+### 4. Menyimpan Konfigurasi PM2
+
+Setelah mengatur aplikasi dengan PM2, simpan konfigurasi saat ini:
+
+```bash
+pm2 save
+```
+
+## Auto Start saat Windows Boot
+
+### 1. Install PM2 Windows Startup
+
+```bash
+npm install -g pm2-windows-startup
+pm2-startup install
+```
+
+### 2. Simpan Konfigurasi Saat Ini
+
+Pastikan aplikasi sudah berjalan dengan PM2, lalu simpan konfigurasi:
+
+```bash
+pm2 save
+```
+
+### 3. Verifikasi Startup
+
+Restart komputer Anda, lalu periksa apakah aplikasi berjalan otomatis:
+
+```bash
+pm2 list
+```
+
+## Troubleshooting
+
+### Jika Aplikasi Tidak Berjalan Otomatis
+
+1. Pastikan PM2 sudah diinstal sebagai layanan Windows:
+   ```
+   npm install -g pm2-windows-service
+   ```
+
+2. Instal PM2 sebagai layanan:
+   ```
+   pm2-service-install -n PM2
+   ```
+
+3. Setel PM2 untuk autostart:
+   ```
+   pm2 save
+   pm2-startup install
+   ```
+
+### Jika Port Sudah Digunakan
+
+Jika mendapatkan error port sudah digunakan:
+
+1. Cari proses yang menggunakan port tersebut:
+   ```
+   netstat -ano | findstr :3001
+   ```
+
+2. Hentikan proses tersebut (ganti <PID> dengan nomor proses):
+   ```
+   taskkill /PID <PID> /F
+   ```
 
 ## Dukungan
 
-Jika menemui masalah, silakan buat issue di repository ini.
+Jika menemui masalah atau memiliki pertanyaan, silakan buat issue baru di [GitHub Repository](https://github.com/fhabibiii/fiber-api/issues).
